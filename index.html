@@ -1,12 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
   <head>
-    <img
-      src="logo-ms.png"
-      alt="Montoni Tech Soluções"
-      style="height: 80px; margin-bottom: 16px"
-    />
-    <h1>Validador de Certificados</h1>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Validador de Certificados - Montoni Tech Soluções</title>
@@ -26,9 +20,14 @@
         background: #0078d4;
         color: white;
         width: 100%;
-        padding: 1.5rem;
         text-align: center;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 1rem 1.5rem 2.5rem 1.5rem;
+      }
+      header img {
+        margin-top: 18px;
+        height: 65px;
+        margin-bottom: 8px;
       }
       main {
         background: white;
@@ -40,7 +39,7 @@
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
       }
       h1 {
-        margin-top: 0;
+        margin: 10px 0 0 0;
         font-size: 1.8rem;
         color: #0078d4;
       }
@@ -60,10 +59,44 @@
       ul.grade-list li {
         margin: 0.6rem 0;
       }
+      .input-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 22px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      input[type="text"] {
+        font-size: 1.08rem;
+        padding: 10px 10px;
+        border: 1px solid #bbb;
+        border-radius: 6px;
+        width: 300px;
+        max-width: 98%;
+        outline: none;
+        transition: border-color 0.23s;
+      }
+      input[type="text"]:focus {
+        border-color: #0078d4;
+      }
+      button {
+        font-size: 1.08rem;
+        background: #0078d4;
+        color: white;
+        border: none;
+        padding: 10px 23px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.23s;
+      }
+      button:active,
+      button:focus {
+        background: #015991;
+      }
       footer {
         margin-top: auto;
         padding: 1rem;
-        font-size: 0.9rem;
+        font-size: 0.92rem;
         color: #666;
       }
     </style>
@@ -71,43 +104,47 @@
   </head>
   <body>
     <header>
+      <img src="logo-ms.png" alt="Montoni Tech Soluções" />
       <h1>Validador de Certificados</h1>
     </header>
     <main>
-      <div id="resultado">Carregando dados do certificado...</div>
+      <div class="input-row">
+        <label for="codigoInput">Código do certificado:</label>
+        <input
+          type="text"
+          id="codigoInput"
+          placeholder="Cole ou digite o código do certificado"
+        />
+        <button onclick="validarManual()">Validar</button>
+      </div>
+      <div id="resultado">Digite o código e clique em Validar.</div>
     </main>
     <footer>Montoni Tech Soluções &copy; 2025</footer>
 
     <script>
-      // Configure com seus dados do Supabase
       const supabaseUrl = "https://mzbozvwlmuamctstvcvs.supabase.co";
       const supabaseAnonKey =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16Ym96dndsbXVhbWN0c3R2Y3ZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwMzUxNTAsImV4cCI6MjA3ODYxMTE1MH0.V0UFeN1dGPzEbh6NhlQXup2yX-Re1a6vfHMN_6bNFdE";
-
       const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-      async function validarCertificado() {
-        const params = new URLSearchParams(window.location.search);
-        const codigo = params.get("id");
+      async function consultarCertificado(codigo) {
         const resultadoDiv = document.getElementById("resultado");
-
         if (!codigo) {
-          resultadoDiv.innerHTML = `<p class="invalid">Código do certificado não informado na URL.</p>`;
+          resultadoDiv.innerHTML = `<p class="invalid">Informe um código de certificado.</p>`;
           return;
         }
-
+        resultadoDiv.textContent = "Carregando dados do certificado...";
         const { data, error } = await supabase
           .from("certificados")
           .select("*")
-          .eq("codigo_certificado", codigo)
+          .eq("codigo_certificado", codigo.trim())
           .single();
 
         if (error || !data) {
           resultadoDiv.innerHTML = `<p class="invalid">Certificado não encontrado ou inválido.</p>`;
           return;
         }
-
-        // Exibir dados do certificado com a grade programática
+        // Exibir dados do certificado
         const certificado = data;
         let gradeHTML = "";
         if (certificado.grade_programatica) {
@@ -122,7 +159,6 @@
             gradeHTML = "<p>Erro ao carregar a grade programática.</p>";
           }
         }
-
         resultadoDiv.innerHTML = `
         <p class="status valid">Certificado válido!</p>
         <p><strong>Nome do Aluno:</strong> ${certificado.nome_aluno}</p>
@@ -139,7 +175,20 @@
       `;
       }
 
-      validarCertificado();
+      function validarManual() {
+        const codigo = document.getElementById("codigoInput").value;
+        consultarCertificado(codigo);
+      }
+
+      // Se vier parâmetro id na URL, já consulta automaticamente
+      window.onload = () => {
+        const params = new URLSearchParams(window.location.search);
+        const codigoURL = params.get("id");
+        if (codigoURL) {
+          document.getElementById("codigoInput").value = codigoURL;
+          consultarCertificado(codigoURL);
+        }
+      };
     </script>
   </body>
 </html>
