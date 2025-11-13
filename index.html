@@ -120,6 +120,7 @@
       <div id="resultado">Digite o código e clique em Validar.</div>
     </main>
     <footer>Montoni Tech Soluções &copy; 2025</footer>
+
     <script>
       const supabaseUrl = "https://mzbozvwlmuamctstvcvs.supabase.co";
       const supabaseAnonKey =
@@ -143,7 +144,6 @@
           resultadoDiv.innerHTML = `<p class="invalid">Certificado não encontrado ou inválido.</p>`;
           return;
         }
-        // Exibir dados do certificado
         const certificado = data;
         let gradeHTML = "";
         if (certificado.grade_programatica) {
@@ -178,8 +178,6 @@
         const codigo = document.getElementById("codigoInput").value;
         consultarCertificado(codigo);
       }
-
-      // Se vier parâmetro id na URL, já consulta automaticamente
       window.onload = () => {
         const params = new URLSearchParams(window.location.search);
         const codigoURL = params.get("id");
